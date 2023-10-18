@@ -60,6 +60,8 @@ export default class Play extends Phaser.Scene {
       this.spinner!.x = 640 / 2;
       this.spinner!.y = 470;
       this.fired = false;
+      this.enemy1!.x = 640;
+      this.enemy1!.y = 270;
     }
 
     if (this.fired == true) {
