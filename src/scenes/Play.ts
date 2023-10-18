@@ -1,8 +1,5 @@
 import * as Phaser from "phaser";
 
-//test
-//test
-
 import starfieldUrl from "/assets/starfield.png";
 
 export default class Play extends Phaser.Scene {
@@ -10,10 +7,11 @@ export default class Play extends Phaser.Scene {
   left?: Phaser.Input.Keyboard.Key;
   right?: Phaser.Input.Keyboard.Key;
 
+  fired?: boolean;
+
   starfield?: Phaser.GameObjects.TileSprite;
   spinner?: Phaser.GameObjects.Shape;
-
-  rotationSpeed = Phaser.Math.PI2 / 1000; // radians per millisecond
+  enemy1?: Phaser.GameObjects.Shape;
 
   constructor() {
     super("play");
@@ -34,6 +32,8 @@ export default class Play extends Phaser.Scene {
     this.left = this.#addKey("LEFT");
     this.right = this.#addKey("RIGHT");
 
+    this.fired = false;
+
     this.starfield = this.add
       .tileSprite(
         0,
@@ -44,26 +44,56 @@ export default class Play extends Phaser.Scene {
       )
       .setOrigin(0, 0);
 
-    this.spinner = this.add.rectangle(100, 100, 50, 50, 0xff0000);
+    this.spinner = this.add.rectangle(640 / 2, 470, 15, 15, 0xb300db);
+    this.enemy1 = this.add.rectangle(640, 270, 60, 40, 0xb300db);
   }
 
-  update(_timeMs: number, delta: number) {
+  update() {
     this.starfield!.tilePositionX -= 4;
+    this.enemy1!.x -= 2;
 
-    if (this.left!.isDown) {
-      this.spinner!.rotation -= delta * this.rotationSpeed;
+    if (this.enemy1!.x == -40) {
+      this.enemy1!.x = 640;
     }
-    if (this.right!.isDown) {
-      this.spinner!.rotation += delta * this.rotationSpeed;
+
+    if (this.checkCollision(this.spinner!, this.enemy1!)) {
+      this.spinner!.x = 640 / 2;
+      this.spinner!.y = 470;
+      this.fired = false;
+    }
+
+    if (this.fired == true) {
+      this.spinner!.y -= 2;
+      if (this.spinner!.y == 0) {
+        this.fired = false;
+        this.spinner!.y = 470;
+      }
+    }
+
+    if (this.left!.isDown && this.fired == false) {
+      this.spinner!.x -= 2;
+    }
+    if (this.right!.isDown && this.fired == false) {
+      this.spinner!.x += 2;
     }
 
     if (this.fire!.isDown) {
-      this.tweens.add({
-        targets: this.spinner,
-        scale: { from: 1.5, to: 1 },
-        duration: 300,
-        ease: Phaser.Math.Easing.Sine.Out,
-      });
+      this.fired = true;
+    }
+  }
+  checkCollision(
+    spinner: Phaser.GameObjects.Shape,
+    enemy: Phaser.GameObjects.Shape,
+  ) {
+    if (
+      spinner.x < enemy.x + enemy.width &&
+      spinner.x + spinner.width > enemy.x &&
+      spinner.y < enemy.y + enemy.height &&
+      spinner.height + spinner.y > enemy.y
+    ) {
+      return true;
+    } else {
+      return false;
     }
   }
 }
