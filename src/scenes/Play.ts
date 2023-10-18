@@ -1,5 +1,7 @@
 import * as Phaser from "phaser";
 
+//test
+
 import starfieldUrl from "/assets/starfield.png";
 
 export default class Play extends Phaser.Scene {
